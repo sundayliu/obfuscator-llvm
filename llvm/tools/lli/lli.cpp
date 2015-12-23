@@ -78,7 +78,7 @@ namespace {
 
   cl::opt<bool> ForceInterpreter("force-interpreter",
                                  cl::desc("Force interpretation: disable JIT"),
-                                 cl::init(false));
+                                 cl::init(true));
 
   cl::opt<JITKind> UseJITKind("jit-kind",
                               cl::desc("Choose underlying JIT kind."),

@@ -27,6 +27,10 @@
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Vectorize.h"
+#include "llvm/Transforms/Obfuscation/CountInstruction.h"
+#include "llvm/Transforms/Obfuscation/AddObfuscation.h"
+#include "llvm/Transforms/Obfuscation/ControlFlowObfuscation.h"
+#include "llvm/Transforms/Obfuscation/StringEncryption.h"
 
 using namespace llvm;
 
@@ -88,6 +92,11 @@ static cl::opt<bool> EnableLoopInterchange(
 static cl::opt<bool> EnableLoopDistribute(
     "enable-loop-distribute", cl::init(false), cl::Hidden,
     cl::desc("Enable the new, experimental LoopDistribution Pass"));
+
+static cl::opt<bool> EnableCountInstruction("sopCounter", cl::init(false), cl::desc("Count opcodes per function"));
+static cl::opt<bool> EnableAddObfuscation("saddObfuscation", cl::init(false), cl::desc("Obfuscation-add instruction"));
+static cl::opt<bool> EnableControlFlowObfuscation("scontrolFlowObfuscation", cl::init(false), cl::desc("Obfuscation-control flow"));
+static cl::opt<bool> EnableStringEncryption("sstringEncryption", cl::init(false), cl::desc("Obfuscation-string encryption"));
 
 PassManagerBuilder::PassManagerBuilder() {
     OptLevel = 2;
@@ -172,6 +181,14 @@ void PassManagerBuilder::populateFunctionPassManager(
 
 void PassManagerBuilder::populateModulePassManager(
     legacy::PassManagerBase &MPM) {
+
+	if (EnableCountInstruction){
+		MPM.add(createCountInstruction());
+	}
+
+	if (EnableAddObfuscation) MPM.add(createAddObfuscation());
+	if (EnableControlFlowObfuscation) MPM.add(createControlFlowObfuscation());
+	if (EnableStringEncryption) MPM.add(createStringEncryption());
   // If all optimizations are disabled, just run the always-inline pass and,
   // if enabled, the function merging pass.
   if (OptLevel == 0) {
